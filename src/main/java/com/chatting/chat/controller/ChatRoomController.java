@@ -36,7 +36,7 @@ public class ChatRoomController {
     @PostMapping("/room")
     @ResponseBody
     public ChatRoom createRoom(@RequestParam String name) {
-        return chatRoomRepository.createchatRoom(name);
+        return chatRoomRepository.createChatRoom(name);
     }
 
     // 채팅방 입장 화면

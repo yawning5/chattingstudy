@@ -32,7 +32,7 @@ public class ChatRoomRepository {
         return chatRoomMap.get(id);
     }
 
-    public ChatRoom createchatRoom(String name) {
+    public ChatRoom createChatRoom(String name) {
         ChatRoom chatRoom = ChatRoom.create(name);
         chatRoomMap.put(chatRoom.getRoomId(), chatRoom);
         return chatRoom;
