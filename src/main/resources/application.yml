@@ -1,0 +1,8 @@
+spring:
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enables: false
+  freemarker:
+    cache: false
