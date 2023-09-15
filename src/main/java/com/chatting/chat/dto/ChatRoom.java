@@ -37,6 +37,10 @@ public class ChatRoom {
     }
 
     public <T> void sendMassage(T message, ChatService chatService) {
+        // parallelStream() 메서드는 Java8의 스트림 API를 활용해서 병렬 스트림을 생성한다.
+        // 이를 통해 여러 클라이언트에게 메시지를 효율적으로 보낼 수 있게 된다.
+        // forEach(...) 각 WebSocket 세션에 대해, chatService의 sendMessage 메서드를 호출하여 message를 보냄
+        // 현재 채팅방에 연결된 모든 클라이언트들에게 메시지를 동시에 전송하는 로직이다.
         sessions.parallelStream().forEach(session -> chatService.sendMessage(session, message));
     }
 }
