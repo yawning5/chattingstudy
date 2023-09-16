@@ -1,8 +1,12 @@
 package com.chatting.chat.controller;
 
 import com.chatting.chat.dto.ChatRoom;
+import com.chatting.chat.dto.LoginInfo;
 import com.chatting.chat.repository.ChatRoomRepository;
+import com.chatting.chat.service.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +22,16 @@ Websocket 통신 외에 챙팅 화면 View 구성을 위해 필요한 Controller
 public class ChatRoomController {
 
     private final ChatRoomRepository chatRoomRepository;
+    private final JwtTokenProvider jwtTokenProvider;
+
+    // 로그인한 회원의 id 및 Jwt토큰 정보를 조회할 수 있는 API
+    @GetMapping("/user")
+    @ResponseBody
+    public LoginInfo getUserInfo() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String name = auth.getName();
+        return LoginInfo.builder().name(name).token(jwtTokenProvider.generateToken(name)).build();
+    }
 
     // 채팅 리스트 화면
     @GetMapping("/room")

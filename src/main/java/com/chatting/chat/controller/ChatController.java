@@ -4,7 +4,9 @@ import com.chatting.chat.dto.ChatMessage;
 import com.chatting.chat.dto.ChatRoom;
 import com.chatting.chat.pubsub.RedisPublisher;
 import com.chatting.chat.repository.ChatRoomRepository;
+import com.chatting.chat.service.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
@@ -30,20 +32,29 @@ publisher구현
  * enterChatRoom 메서드를 세팅한다. 채팅방에 발행된 메시지는
  * 서로 다른 서버에 공유하기 위해 redis의 Topic으로 발행
  */
+/**
+ * basic4
+ * Websocket을 통해 서버에 메시지가 Send(/pub/chat/message) 되었을 때도 Jwt token 유효성 검증이 필요
+ * 다음과 같이 회원 대화명(id)를 조회하는 코드를 삽입해서 유효성이 체크될 수 있도록 한다.
+ * 유효하지 않은 Jwt토큰이 세팅될 경우 websocket을 통해 보낸 메시지는 무시된다.
+ */
 public class ChatController {
 
 //    private final SimpMessageSendingOperations messagingTemplate;
     private final RedisPublisher redisPublisher;
     private final ChatRoomRepository chatRoomRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     /**
      * websocket "/pub/chat/message"로 들어오는 메시징을 처리한다.
      */
     @MessageMapping("/chat/message")
-    public void message(ChatMessage message) {
+    public void message(ChatMessage message, @Header("token") String token) {
+        String nickname = jwtTokenProvider.getUserNameFromJwt(token);
+
         if (ChatMessage.MessageType.ENTER.equals(message.getType())) {
             chatRoomRepository.enterChatRoom(message.getRoomId());
-            message.setMessage(message.getSender() + "님이 입장하셨습니다.");
+            message.setMessage(nickname + "님이 입장하셨습니다.");
         }
         // Websocket에 발행된 메시지를 redis로 발행한다 (publish)
         redisPublisher.publish(chatRoomRepository.getTopic(message.getRoomId()), message);
