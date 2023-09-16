@@ -2,6 +2,8 @@ package com.chatting.chat.controller;
 
 import com.chatting.chat.dto.ChatMessage;
 import com.chatting.chat.dto.ChatRoom;
+import com.chatting.chat.pubsub.RedisPublisher;
+import com.chatting.chat.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -22,15 +24,29 @@ publisher구현
 여기서 /sub/chat/room/{roomId}는 채팅룸을 구분하는 값이므로 pub/sub에서 Topic의 역할이라고 보면된다.
 기존의 WebSocketHandler가 했던 역할을 대체하므로 WebSocketHandler는 삭제
  */
+/**
+ * basic3
+ * 클라이언트가 채팅방 입장시 채팅방(topic)에서 대화가 가능하도록 리스너를 연동하는
+ * enterChatRoom 메서드를 세팅한다. 채팅방에 발행된 메시지는
+ * 서로 다른 서버에 공유하기 위해 redis의 Topic으로 발행
+ */
 public class ChatController {
 
-    private final SimpMessageSendingOperations messagingTemplate;
+//    private final SimpMessageSendingOperations messagingTemplate;
+    private final RedisPublisher redisPublisher;
+    private final ChatRoomRepository chatRoomRepository;
 
+    /**
+     * websocket "/pub/chat/message"로 들어오는 메시징을 처리한다.
+     */
     @MessageMapping("/chat/message")
     public void message(ChatMessage message) {
-        if (ChatMessage.MessageType.ENTER.equals(message.getType()))
+        if (ChatMessage.MessageType.ENTER.equals(message.getType())) {
+            chatRoomRepository.enterChatRoom(message.getRoomId());
             message.setMessage(message.getSender() + "님이 입장하셨습니다.");
-        messagingTemplate.convertAndSend("/sub/chat/room/" + message.getRoomId(), message);
+        }
+        // Websocket에 발행된 메시지를 redis로 발행한다 (publish)
+        redisPublisher.publish(chatRoomRepository.getTopic(message.getRoomId()), message);
     }
     /*
     구독자(subscriber)구현
