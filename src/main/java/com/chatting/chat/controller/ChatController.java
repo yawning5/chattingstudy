@@ -59,6 +59,7 @@ public class ChatController {
      */
     @MessageMapping("/chat/message")
     public void message(ChatMessage message, @Header("token") String token) {
+        // jwt에서 닉네임 받아옴 -> 이 과정에 parser가 들어가있어서 jwt 토큰이 이상하면 거절처리 됨
         String nickname = jwtTokenProvider.getUserNameFromJwt(token);
         // 로그인 회원 정보로 대화명 설정
         message.setSender(nickname);
@@ -67,7 +68,7 @@ public class ChatController {
 //            chatRoomRepository.enterChatRoom(message.getRoomId());
 //            message.setMessage(nickname + "님이 입장하셨습니다.");
             message.setSender("[알림]");
-            message.setMessage(nickname + "님이 입장 하셨습니다");
+            message.setMessage(nickname + "님이 입장하셨습니다.");
         }
         // Websocket에 발행된 메시지를 redis로 발행한다 (publish)
 //        redisPublisher.publish(chatRoomRepository.getTopic(message.getRoomId()), message);

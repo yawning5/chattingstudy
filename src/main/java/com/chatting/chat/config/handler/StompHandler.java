@@ -15,6 +15,7 @@ import java.nio.channels.Channel;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+// ChannelInterceptor -> Spring 에서 제공하는 Stomp메시지를 처리하기 전후에 로직을 실행할 수 있게 해주는 인터페이스
 public class StompHandler implements ChannelInterceptor {
 
     private final JwtTokenProvider jwtTokenProvider;
