@@ -24,6 +24,23 @@ public class ChatRoomController {
     private final ChatRoomRepository chatRoomRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
+    // basic5 수정 모든 채팅방 목록 반환
+    @GetMapping("/rooms")
+    @ResponseBody
+    public List<ChatRoom> room() {
+        List<ChatRoom> chatRooms = chatRoomRepository.findAllRoom();
+        chatRooms.stream()
+                .forEach(room -> room.setUserCount(chatRoomRepository.getUserCount(room.getRoomId())));
+        return chatRooms;
+    }
+
+//        // 모든 채팅방 목록 반환
+//    @GetMapping("/rooms")
+//    @ResponseBody
+//    public List<ChatRoom> room() {
+//        return chatRoomRepository.findAllRoom();
+//    }
+
     // 로그인한 회원의 id 및 Jwt토큰 정보를 조회할 수 있는 API
     @GetMapping("/user")
     @ResponseBody
@@ -40,13 +57,6 @@ public class ChatRoomController {
     @GetMapping("/room")
     public String rooms(Model model) {
         return "/chat/room";
-    }
-
-    // 모든 채팅방 목록 반환
-    @GetMapping("/rooms")
-    @ResponseBody
-    public List<ChatRoom> room() {
-        return chatRoomRepository.findAllRoom();
     }
 
     // 채팅방 생성

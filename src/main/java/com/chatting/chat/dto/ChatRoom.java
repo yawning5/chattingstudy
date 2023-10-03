@@ -2,6 +2,7 @@ package com.chatting.chat.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.Serializable;
@@ -10,6 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Getter
+@Setter
 /*
 basic1
 채팅방은 입장한 클라이언트들의 정보를 가지고 있어야 하므로 WebsocketSession 정보 리스트를 멤버필드로 갖는다
@@ -29,12 +31,17 @@ pub/sub 방식을 이용하면 구독자 관리가 알아서 되므로 웹소켓
  * Redis에 저장되는 객체들은 Serialize 가능해야 하므로 Serializable을 참조하도록 선언하고
  * serialVersionUID를 세팅해준다
  */
+/*
+basic5
+채팅방 리스트에서도 입장한 채팅인원수를 표시하기 위해 다음과 같이 수정한다.
+ */
 public class ChatRoom implements Serializable {
 
     private static final long serialVersionUID = 6494678977089006639L;
 
     private String roomId;
     private String name;
+    private long userCount; // 채팅방 인원수
 
     public static ChatRoom create(String name) {
         ChatRoom chatRoom = new ChatRoom();
